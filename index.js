@@ -433,6 +433,23 @@ module.exports = (params) => {
     AWS.config.update({ httpOptions: { agent: sslAgent } })
   }
 
+
+  /** Allow For local development by allowing explicit setting of AWS credentials */
+  // Credentials pass through
+  if(params.credentials) {
+    AWS.config.credentials = params.credentials;
+  }
+  // Load Profile from shared credentials file if profile is in params
+  else if (params.profile) {
+    let credentials = new AWS.SharedIniFileCredentials({profile: params.profile});
+    AWS.config.credentials = credentials;
+  }
+  // If no profile is provided and accessKey and secretAccessKey exist use them to create credentials
+  else if (params.accessKeyId && params.secretAccessKey) {
+    let credentials = new AWS.Credentials(params.accessKeyId, params.secretAccessKey, params.sessionToken || null);
+    AWS.config.credentials = credentials;
+  }
+
   // Set the configuration for this instance
   const config = {
 
